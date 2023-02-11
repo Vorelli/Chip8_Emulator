@@ -135,46 +135,32 @@ impl Cpu {
             memory[x_index] = rand::thread_rng().gen::<u8>() & ((command & 0x00ff) as u8);
         } else if command < 0xE000 {
             //DXYN
-            let x_pos = memory[((command & 0x0f00) >> 8) as usize];
-            let x_def = x_pos;
-            let y_pos = memory[((command & 0x00f0) >> 4) as usize];
-            let num_bytes = (command & 0x000f) as u8;
-
-            let mut i = ((memory[96] as u16) << 8) | memory[97] as u16;
-            let mut flipped_data = 0;
             let width = 8;
-            let height = num_bytes;
-            let mut y = y_pos;
-            for _ in y_pos..y_pos + height {
-                if y > 0x1f {
-                    y = 0;
-                }
+            let height = (command & 0x000f) as usize;
 
-                let data = memory[i as usize];
+            let x_index = ((command & 0x0F00) >> 8) as usize;
+            let y_index = ((command & 0x00F0) >> 4) as usize;
 
-                let mut x = x_pos;
-                for _ in x_pos..x_pos + width {
-                    if x > 0x3f {
-                        x = 0;
+            let x_coord = memory[x_index] as usize;
+            let y_coord = memory[y_index] as usize;
+            let i = ((memory[96] as usize) << 8) + (memory[97] as usize);
+            memory[0xf] = 0;
+
+            for sprite_y in 0..height {
+                let sprite_byte = memory[i + sprite_y];
+
+                for sprite_x in 0..width {
+                    let x = (x_coord + sprite_x) % 64;
+                    let y = (y_coord + sprite_y) % 32;
+
+                    let sprite_pixel = (sprite_byte & (1 << 7 - sprite_x)) != 0;
+                    let mem_pixel = (memory[0xE90 + (x / 8) + (y * 8)] & (1 << (7 - (x % 8)))) != 0;
+                    if sprite_pixel {
+                        memory[0xf] |= if mem_pixel { 1 } else { 0 };
+                        memory[0xE90 + (x / 8) + (y * 8)] ^= 1 << (7 - (x % 8));
                     }
-                    let location = ((x / 8) as usize + 0xE90 + (y * 8) as usize);
-                    let mem_bit_index = 7 - (x % 8);
-                    let data_bit_index = 7 - ((x - x_def) % 8);
-                    let mem_bit = memory[location] & (1 << mem_bit_index);
-                    let data_bit = data & (1 << data_bit_index);
-                    let comp_bit = if data_bit == 0 { 0 } else { 1 << mem_bit_index };
-
-                    if flipped_data == 0 {
-                        flipped_data = mem_bit & comp_bit;
-                    };
-
-                    memory[location] = memory[location] ^ comp_bit;
-                    x += 1;
                 }
-                i += 1;
-                y += 1;
             }
-            memory[0xf] = flipped_data;
         } else if command < 0xF000 {
             //EX9E / EXA1
             let x_index = ((command & 0x0f00) >> 8) as usize;

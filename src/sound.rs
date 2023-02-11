@@ -9,8 +9,9 @@ impl SoundGenerator {
         let frequency = source::SineWave::new(440.0);
         let (_stream, stream_handle) = rodio::OutputStream::try_default().unwrap();
         let sink = rodio::Sink::try_new(&stream_handle).unwrap();
-        sink.set_volume(0.05);
+        sink.set_volume(1.);
         sink.append(frequency);
+        sink.play();
 
         SoundGenerator { sink }
     }

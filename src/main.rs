@@ -42,17 +42,20 @@ fn main() {
         let args: Vec<String> = env::args().collect();
         Cpu::load_prog_into_memory(&args[1], memory);
 
-        let mut display_timer = Instant::now();
-        let mut delay_timer = Instant::now();
+        let mut timer = Instant::now();
 
         while display.window.is_open() {
-            if delay_timer.elapsed().as_micros() >= 16667 {
+            if timer.elapsed().as_micros() >= 16667 {
+                timer = Instant::now();
                 memory[100] = display.refresh_and_get_input(&memory[0xE90..0xE90 + 256]);
                 cpu.step(memory);
                 cpu.step(memory);
                 cpu.step(memory);
                 cpu.step(memory);
-                delay_timer = Instant::now();
+                cpu.step(memory);
+                cpu.step(memory);
+                cpu.step(memory);
+                cpu.step(memory);
                 if memory[98] > 0 {
                     //delay timer
                     memory[98] -= 1;
