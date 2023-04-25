@@ -21,6 +21,6 @@ impl SoundGenerator {
     }
 
     pub fn pause(self: &Self) {
-        self.sink.play();
+        self.sink.pause();
     }
 }

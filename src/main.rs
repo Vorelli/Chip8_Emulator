@@ -45,13 +45,9 @@ fn main() {
         let mut timer = Instant::now();
 
         while display.window.is_open() {
-            if timer.elapsed().as_micros() >= 16667 {
+            if timer.elapsed().as_micros() >= (16667/2) {
                 timer = Instant::now();
                 memory[100] = display.refresh_and_get_input(&memory[0xE90..0xE90 + 256]);
-                cpu.step(memory);
-                cpu.step(memory);
-                cpu.step(memory);
-                cpu.step(memory);
                 cpu.step(memory);
                 cpu.step(memory);
                 cpu.step(memory);

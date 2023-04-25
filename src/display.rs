@@ -13,7 +13,7 @@ pub struct DisplayAndInput {
 
 impl DisplayAndInput {
     pub fn new(width: usize, height: usize, scale: Option<minifb::Scale>) -> DisplayAndInput {
-        let mut window_options: WindowOptions = WindowOptions {
+        let window_options: WindowOptions = WindowOptions {
             borderless: false,
             title: true,
             resize: false,
@@ -73,10 +73,10 @@ impl DisplayAndInput {
             .window
             .update_with_buffer(&self.buffer, self.width, self.height)
         {
-            _ => {}
             Err(error) => {
                 panic!("{}", error);
             }
+            _ => {}
         }
     }
 
